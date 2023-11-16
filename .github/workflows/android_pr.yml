@@ -1,9 +1,6 @@
 name: Android pull request test
 
 on:
-  push:
-    branches:
-      - 'kaeawc/*'
   pull_request:
     branches:
       - '*'
