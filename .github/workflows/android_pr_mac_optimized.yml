@@ -3,7 +3,10 @@ name: CI fun
 on:
   push:
     branches:
-      - 'kaeawc*'
+      - 'kaeawc/*'
+  pull_request:
+    branches:
+      - '*'
 
 env:
   # Setting an environment variable with the value of a configuration variable
