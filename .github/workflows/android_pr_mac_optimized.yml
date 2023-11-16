@@ -1,9 +1,9 @@
-name: Android pull request test
+name: CI fun
 
 on:
   push:
     branches:
-      - '*'
+      - '*kaeawc*'
 
 env:
   # Setting an environment variable with the value of a configuration variable
