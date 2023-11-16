@@ -77,7 +77,6 @@ jobs:
           export GRADLE_FLAGS="
             --continue
             --stacktrace
-            -Dorg.gradle.configuration-cache.internal.report-link-as-warning=true
             "
 
           # Remove any newlines or tabs from GRADLE_FLAGS
@@ -103,18 +102,7 @@ jobs:
             ~/.gradle/wrapper
           key: v2-${{ runner.os }}-gradle-wrapper-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
 
-      - name: "Restore Gradle Home & Project Caches"
-        id: cache-gradle-home-project
-        uses: actions/cache/restore@v3
-        with:
-          path: |
-            ~/.gradle/caches
-            .gradle
-          key:
-            v2-${{ runner.os }}-gradle-home-project-${{ vars.JOB_NAME }}-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}-${{ hashFiles('gradle/libs.versions.toml') }}-${{ hashFiles('gradle.properties') }}-${{ hashFiles('/tmp/gradle_flags.txt') }}-${{ hashFiles('**/*.gradle.kts') }}
-
       - name: "Restore Gradle Home Cache"
-        if: steps.cache-gradle-home-project.outputs.cache-hit != 'true'
         id: cache-gradle-home
         uses: actions/cache/restore@v3
         with:
@@ -182,13 +170,6 @@ jobs:
           path: |
             build/reports/gradle-profiler
 
-      - name: "Store Configuration Cache Report"
-        uses: actions/upload-artifact@v3
-        with:
-          name: configuration-cache-report
-          path: |
-            build/reports/configuration-cache/**/*.html
-
       - name: "Save Gradle Wrapper"
         uses: actions/cache/save@v3
         if: steps.cache-gradle-wrapper.outputs.cache-hit != 'true'
@@ -207,55 +188,12 @@ jobs:
           key:
             v2-${{ runner.os }}-gradle-build-${{ vars.JOB_NAME }}-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}-${{ hashFiles('gradle/libs.versions.toml') }}-${{ hashFiles('gradle.properties') }}-${{ hashFiles('/tmp/gradle_flags.txt') }}-${{ hashFiles('**/*.gradle.kts') }}-${{ hashFiles('**/*.kt') }}
 
-      - name: "Prepare Gradle Project & Home Caches for Configuration Cache"
-        if: steps.cache-gradle-home-project.outputs.cache-hit != 'true'
-        run: |
-
-          # TODO: Once convention plugins are added we will need to preserve its build folder
-          echo "Preserve project Gradle cache"
-          find .gradle -maxdepth 1 -type d \
-            -regex ".gradle/.*" \
-            -not -regex ".*/8.4" \
-            -not -regex ".*/configuration-cache" | \
-            xargs rm -rf
-
-          echo " "
-          echo "Preserve Gradle home cache"
-          find ~/.gradle/caches -maxdepth 1 -type d \
-            -regex ".*/caches/.*" \
-            -not -regex ".*/8.4" \
-            -not -regex ".*/modules-2" \
-            -not -regex ".*/jars-9" \
-            -not -regex ".*/transforms-3" | \
-            xargs rm -rf
-
-          echo " "
-          echo "Preserve Gradle home configuration cache keystore and any generated Gradle jars"
-          find ~/.gradle/caches/8.4 -maxdepth 1 -type d \
-            -regex ".*/caches/8.4/.*" \
-            -not -regex ".*/cc-keystore" \
-            -not -regex ".*/kotlin-dsl" \
-            -not -regex ".*/generated-gradle-jars" | \
-            xargs rm -rf
-          
-          # Remove Kotlin build results from any convention plugin build folder
-
-      - name: "Save Gradle Home & Project cache"
-        uses: actions/cache/save@v3
-        if: steps.cache-gradle-home-project.outputs.cache-hit != 'true'
-        with:
-          path: |
-            ~/.gradle/caches
-            .gradle
-          key:
-            v2-${{ runner.os }}-gradle-home-project-${{ vars.JOB_NAME }}-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}-${{ hashFiles('gradle/libs.versions.toml') }}-${{ hashFiles('gradle.properties') }}-${{ hashFiles('/tmp/gradle_flags.txt') }}-${{ hashFiles('**/*.gradle.kts') }}
-
       - name: "Prepare Gradle Home Cache with only Dependency & Script Caches"
-        if: steps.cache-gradle-home-project.outputs.cache-hit != 'true' && steps.cache-gradle-home.outputs.cache-hit != 'true'
+        if: steps.cache-gradle-home.outputs.cache-hit != 'true'
         run: |
 
           echo " "
-          echo "Preserve Gradle home cache"
+          echo "Preserve Gradle home dependency cache"
           find ~/.gradle/caches -maxdepth 1 -type d \
             -regex ".*/caches/.*" \
             -not -regex ".*/8.4" \
@@ -263,7 +201,7 @@ jobs:
             xargs rm -rf
           
           echo " "
-          echo "Preserve Gradle home configuration cache keystore and any generated Gradle jars"
+          echo "Preserve Gradle home script cache"
           find ~/.gradle/caches/8.4 -maxdepth 1 -type d \
             -regex ".*/caches/8.4/.*" \
             -not -regex ".*/kotlin-dsl" \
@@ -272,7 +210,7 @@ jobs:
 
       - name: "Save Gradle Home cache"
         uses: actions/cache/save@v3
-        if: steps.cache-gradle-home-project.outputs.cache-hit != 'true' && steps.cache-gradle-home.outputs.cache-hit != 'true'
+        if: steps.cache-gradle-home.outputs.cache-hit != 'true'
         with:
           path: |
             ~/.gradle/caches
