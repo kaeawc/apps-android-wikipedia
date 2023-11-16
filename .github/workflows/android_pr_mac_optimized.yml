@@ -35,12 +35,12 @@ jobs:
         id: cache-jemalloc
         uses: actions/cache/restore@v3
         with:
-          path: /tmp/libjemalloc.so.2
+          path: /tmp/libjemalloc.2.dylib
           key: v2-${{ runner.os }}-jemalloc-5.3.0
 
       - name: "Relocate jemalloc to expected directory"
         if: steps.cache-jemalloc.outputs.cache-hit == 'true'
-        run: sudo mv /tmp/libjemalloc.so.2 /usr/local/lib/
+        run: sudo mv /tmp/libjemalloc.2.dylib /usr/local/lib/
 
       - name: "Download jemalloc"
         if: steps.cache-jemalloc.outputs.cache-hit != 'true'
@@ -58,16 +58,16 @@ jobs:
           make
           sudo make install
 
-      - name: "Configure LD_PRELOAD"
+      - name: "Preload jemalloc"
         run: |
-          echo 'export LD_PRELOAD=/usr/local/lib/libjemalloc.so.2 app' >> $GITHUB_ENV
-          cp /usr/local/lib/libjemalloc.so.2 /tmp/
+          echo 'export DYLD_INSERT_LIBRARIES=/usr/local/lib/libjemalloc.2.dylib' >> $GITHUB_ENV
+          cp /usr/local/lib/libjemalloc.2.dylib /tmp/
 
       - name: "Save jemalloc"
         uses: actions/cache/save@v3
         if: steps.cache-jemalloc.outputs.cache-hit != 'true'
         with:
-          path: /tmp/libjemalloc.so.2
+          path: /tmp/libjemalloc.2.dylib
           key: v2-${{ runner.os }}-jemalloc-5.3.0
 
       - name: "Download Gradle Profiler"
