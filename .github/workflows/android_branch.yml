@@ -57,15 +57,6 @@ jobs:
           path: /tmp/libjemalloc.so.2
           key: v2-${{ runner.os }}-jemalloc-5.3.0
 
-      - name: "Download Gradle Profiler"
-        run: curl -Ls https://repo1.maven.org/maven2/org/gradle/profiler/gradle-profiler/0.20.0/gradle-profiler-0.20.0.zip -o /tmp/gradle-profiler-0.20.0.zip
-
-      - name: "Unzip Gradle Profiler"
-        run: unzip /tmp/gradle-profiler-0.20.0.zip -d /tmp
-
-      - name: "Create Gradle Profiler Report Directory"
-        run: mkdir -p build/reports/gradle-profiler
-
       - name: "Print Java Flags & version"
         run: |
           java -XX:+UseParallelGC -XX:+UnlockExperimentalVMOptions -XX:+PrintFlagsFinal -version
@@ -133,18 +124,7 @@ jobs:
         run: git submodule update --init --recursive
 
       - name: "Build, test, and lint"
-        run: |
-          /tmp/gradle-profiler-0.20.0/bin/gradle-profiler \
-            --project-dir ./ \
-            --profile chrome-trace \
-            --output-dir build/reports/gradle-profiler \
-            --gradle-user-home ~/.gradle \
-            --measure-config-time \
-            --measure-gc \
-            --iterations 1 \
-            --warmups 1 \
-            --measure-local-build-cache \
-            assembleAlphaRelease $GRADLE_FLAGS
+        run: ./gradlew assembleAlphaRelease $GRADLE_FLAGS
 
       - name: List
         run: ls -alR ./app/build/outputs/apk/
@@ -162,13 +142,6 @@ jobs:
         with:
           name: app_alpha_release
           path: ${{steps.build_signed.outputs.signedReleaseFile}}
-
-      - name: "Store Gradle Profiler Report"
-        uses: actions/upload-artifact@v3
-        with:
-          name: gradle-profiler-report
-          path: |
-            build/reports/gradle-profiler
 
       - name: "Save Gradle Wrapper"
         uses: actions/cache/save@v3
