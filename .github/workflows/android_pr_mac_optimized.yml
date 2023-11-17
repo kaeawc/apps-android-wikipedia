@@ -116,7 +116,7 @@ jobs:
             ~/.gradle/caches
             .gradle
           key:
-            v2-${{ runner.os }}-gradle-home-project-${{ vars.JOB_NAME }}-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}-${{ hashFiles('gradle/libs.versions.toml') }}-${{ hashFiles('gradle.properties') }}-${{ hashFiles('/tmp/gradle_flags.txt') }}-${{ hashFiles('**/*.gradle.kts') }}
+            v3-${{ runner.os }}-gradle-home-project-${{ vars.JOB_NAME }}-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}-${{ hashFiles('gradle/libs.versions.toml') }}-${{ hashFiles('gradle.properties') }}-${{ hashFiles('/tmp/gradle_flags.txt') }}-${{ hashFiles('**/*.gradle.kts') }}
 
       - name: "Restore Gradle Home Cache"
         if: steps.cache-gradle-home-project.outputs.cache-hit != 'true'
@@ -126,11 +126,11 @@ jobs:
           path: |
             ~/.gradle/caches
           key:
-            v2-${{ runner.os }}-gradle-home-${{ vars.JOB_NAME }}-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}-${{ hashFiles('gradle/libs.versions.toml') }}-${{ hashFiles('gradle.properties') }}
+            v3-${{ runner.os }}-gradle-home-${{ vars.JOB_NAME }}-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}-${{ hashFiles('gradle/libs.versions.toml') }}-${{ hashFiles('gradle.properties') }}
           restore-keys: |
-            v2-${{ runner.os }}-gradle-home-${{ vars.JOB_NAME }}-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}-${{ hashFiles('gradle/libs.versions.toml') }}
-            v2-${{ runner.os }}-gradle-home-${{ vars.JOB_NAME }}-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
-            v2-${{ runner.os }}-gradle-home-${{ vars.JOB_NAME }}
+            v3-${{ runner.os }}-gradle-home-${{ vars.JOB_NAME }}-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}-${{ hashFiles('gradle/libs.versions.toml') }}
+            v3-${{ runner.os }}-gradle-home-${{ vars.JOB_NAME }}-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
+            v3-${{ runner.os }}-gradle-home-${{ vars.JOB_NAME }}
 
       - name: "Restore Gradle Build Cache"
         id: cache-gradle-build
@@ -139,12 +139,12 @@ jobs:
           path: |
             ~/.gradle/caches/build-cache-*
           key:
-            v2-${{ runner.os }}-gradle-build-${{ vars.JOB_NAME }}-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}-${{ hashFiles('gradle/libs.versions.toml') }}-${{ hashFiles('gradle.properties') }}-${{ hashFiles('/tmp/gradle_flags.txt') }}-${{ hashFiles('**/*.gradle.kts') }}-${{ hashFiles('**/*.kt') }}
+            v3-${{ runner.os }}-gradle-build-${{ vars.JOB_NAME }}-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}-${{ hashFiles('gradle/libs.versions.toml') }}-${{ hashFiles('gradle.properties') }}-${{ hashFiles('/tmp/gradle_flags.txt') }}-${{ hashFiles('**/*.gradle.kts') }}-${{ hashFiles('**/*.kt') }}
           restore-keys: |
-            v2-${{ runner.os }}-gradle-build-${{ vars.JOB_NAME }}-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}-${{ hashFiles('gradle/libs.versions.toml') }}-${{ hashFiles('gradle.properties') }}-${{ hashFiles('/tmp/gradle_flags.txt') }}-${{ hashFiles('**/*.gradle.kts') }}
-            v2-${{ runner.os }}-gradle-build-${{ vars.JOB_NAME }}-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}-${{ hashFiles('gradle/libs.versions.toml') }}-${{ hashFiles('gradle.properties') }}-${{ hashFiles('/tmp/gradle_flags.txt') }}
-            v2-${{ runner.os }}-gradle-build-${{ vars.JOB_NAME }}-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}-${{ hashFiles('gradle/libs.versions.toml') }}
-            v2-${{ runner.os }}-gradle-build-${{ vars.JOB_NAME }}-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
+            v3-${{ runner.os }}-gradle-build-${{ vars.JOB_NAME }}-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}-${{ hashFiles('gradle/libs.versions.toml') }}-${{ hashFiles('gradle.properties') }}-${{ hashFiles('/tmp/gradle_flags.txt') }}-${{ hashFiles('**/*.gradle.kts') }}
+            v3-${{ runner.os }}-gradle-build-${{ vars.JOB_NAME }}-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}-${{ hashFiles('gradle/libs.versions.toml') }}-${{ hashFiles('gradle.properties') }}-${{ hashFiles('/tmp/gradle_flags.txt') }}
+            v3-${{ runner.os }}-gradle-build-${{ vars.JOB_NAME }}-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}-${{ hashFiles('gradle/libs.versions.toml') }}
+            v3-${{ runner.os }}-gradle-build-${{ vars.JOB_NAME }}-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
 
       - name: "Build, test, and lint"
         run: ./gradlew checkstyle ktlint assembleAlphaRelease lintAlphaRelease testAlphaRelease $GRADLE_FLAGS
@@ -178,7 +178,7 @@ jobs:
           path: |
             ~/.gradle/caches/build-cache-*
           key:
-            v2-${{ runner.os }}-gradle-build-${{ vars.JOB_NAME }}-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}-${{ hashFiles('gradle/libs.versions.toml') }}-${{ hashFiles('gradle.properties') }}-${{ hashFiles('/tmp/gradle_flags.txt') }}-${{ hashFiles('**/*.gradle.kts') }}-${{ hashFiles('**/*.kt') }}
+            v3-${{ runner.os }}-gradle-build-${{ vars.JOB_NAME }}-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}-${{ hashFiles('gradle/libs.versions.toml') }}-${{ hashFiles('gradle.properties') }}-${{ hashFiles('/tmp/gradle_flags.txt') }}-${{ hashFiles('**/*.gradle.kts') }}-${{ hashFiles('**/*.kt') }}
 
       - name: "Prepare Gradle Project & Home Caches for Configuration Cache"
         if: steps.cache-gradle-home-project.outputs.cache-hit != 'true'
@@ -221,7 +221,7 @@ jobs:
             ~/.gradle/caches
             .gradle
           key:
-            v2-${{ runner.os }}-gradle-home-project-${{ vars.JOB_NAME }}-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}-${{ hashFiles('gradle/libs.versions.toml') }}-${{ hashFiles('gradle.properties') }}-${{ hashFiles('/tmp/gradle_flags.txt') }}-${{ hashFiles('**/*.gradle.kts') }}
+            v3-${{ runner.os }}-gradle-home-project-${{ vars.JOB_NAME }}-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}-${{ hashFiles('gradle/libs.versions.toml') }}-${{ hashFiles('gradle.properties') }}-${{ hashFiles('/tmp/gradle_flags.txt') }}-${{ hashFiles('**/*.gradle.kts') }}
 
       - name: "Prepare Gradle Home Cache with only Dependency & Script Caches"
         if: steps.cache-gradle-home-project.outputs.cache-hit != 'true' && steps.cache-gradle-home.outputs.cache-hit != 'true'
@@ -250,4 +250,4 @@ jobs:
           path: |
             ~/.gradle/caches
           key:
-            v2-${{ runner.os }}-gradle-home-${{ vars.JOB_NAME }}-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}-${{ hashFiles('gradle/libs.versions.toml') }}-${{ hashFiles('gradle.properties') }}
+            v3-${{ runner.os }}-gradle-home-${{ vars.JOB_NAME }}-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}-${{ hashFiles('gradle/libs.versions.toml') }}-${{ hashFiles('gradle.properties') }}
