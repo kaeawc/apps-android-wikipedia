@@ -14,7 +14,7 @@ env:
 
 jobs:
   test_pr:
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v4
