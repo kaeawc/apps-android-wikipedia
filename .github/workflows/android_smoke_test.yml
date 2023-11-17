@@ -29,14 +29,44 @@ jobs:
           distribution: 'zulu'
           java-version: '20'
 
-      - name: "Download Gradle Profiler"
-        run: curl -Ls https://repo1.maven.org/maven2/org/gradle/profiler/gradle-profiler/0.20.0/gradle-profiler-0.20.0.zip -o /tmp/gradle-profiler-0.20.0.zip
+      - name: "Restore jemalloc"
+        id: cache-jemalloc
+        uses: actions/cache/restore@v3
+        with:
+          path: /tmp/libjemalloc.2.dylib
+          key: v2-${{ runner.os }}-jemalloc-5.3.0
 
-      - name: "Unzip Gradle Profiler"
-        run: unzip /tmp/gradle-profiler-0.20.0.zip -d /tmp
+      - name: "Relocate jemalloc to expected directory"
+        if: steps.cache-jemalloc.outputs.cache-hit == 'true'
+        run: sudo mv /tmp/libjemalloc.2.dylib /usr/local/lib/
 
-      - name: "Create Gradle Profiler Report Directory"
-        run: mkdir -p build/reports/gradle-profiler
+      - name: "Download jemalloc"
+        if: steps.cache-jemalloc.outputs.cache-hit != 'true'
+        run: curl -Ls https://github.com/jemalloc/jemalloc/releases/download/5.3.0/jemalloc-5.3.0.tar.bz2 -o jemalloc-5.3.0.tar.bz2
+
+      - name: "Unzip jemalloc"
+        if: steps.cache-jemalloc.outputs.cache-hit != 'true'
+        run: tar xvf jemalloc-5.3.0.tar.bz2
+
+      - name: "Configure jemalloc"
+        if: steps.cache-jemalloc.outputs.cache-hit != 'true'
+        run: |
+          cd jemalloc-5.3.0
+          ./configure
+          make
+          sudo make install
+
+      - name: "Preload jemalloc"
+        run: |
+          echo 'export DYLD_INSERT_LIBRARIES=/usr/local/lib/libjemalloc.2.dylib' >> $GITHUB_ENV
+          cp /usr/local/lib/libjemalloc.2.dylib /tmp/
+
+      - name: "Save jemalloc"
+        uses: actions/cache/save@v3
+        if: steps.cache-jemalloc.outputs.cache-hit != 'true'
+        with:
+          path: /tmp/libjemalloc.2.dylib
+          key: v2-${{ runner.os }}-jemalloc-5.3.0
 
       - name: "Print Java Flags & version"
         run: |
@@ -114,26 +144,15 @@ jobs:
             v2-${{ runner.os }}-gradle-build-${{ vars.JOB_NAME }}-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
 
       - name: "Build APK & Test APK"
-        run: |
-          /tmp/gradle-profiler-0.20.0/bin/gradle-profiler \
-            --project-dir ./ \
-            --profile chrome-trace \
-            --output-dir build/reports/gradle-profiler \
-            --gradle-user-home ~/.gradle \
-            --measure-config-time \
-            --measure-gc \
-            --iterations 1 \
-            --warmups 1 \
-            --measure-local-build-cache \
-            assembleDevDebug assembleDevDebugAndroidTest $GRADLE_FLAGS
+        run: ./gradlew assembleDevDebug assembleDevDebugAndroidTest $GRADLE_FLAGS
 
-      - name: Instrumentation Tests
+      - name: "Instrumentation Tests"
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 29
           script: ./gradlew connectedDevDebugAndroidTest --stacktrace
 
-      - name: Upload results
+      - name: "Upload results"
         if: ${{ always() }}
         uses: actions/upload-artifact@v2
         with:
