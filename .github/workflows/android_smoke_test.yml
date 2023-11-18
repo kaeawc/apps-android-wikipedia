@@ -30,6 +30,45 @@ jobs:
         distribution: 'zulu'
         java-version: '20'
 
+    - name: "Restore jemalloc"
+      id: cache-jemalloc
+      uses: actions/cache/restore@v3
+      with:
+        path: /tmp/libjemalloc.2.dylib
+        key: v2-${{ runner.os }}-jemalloc-5.3.0
+
+    - name: "Relocate jemalloc to expected directory"
+      if: steps.cache-jemalloc.outputs.cache-hit == 'true'
+      run: sudo mv /tmp/libjemalloc.2.dylib /usr/local/lib/
+
+    - name: "Download jemalloc"
+      if: steps.cache-jemalloc.outputs.cache-hit != 'true'
+      run: curl -Ls https://github.com/jemalloc/jemalloc/releases/download/5.3.0/jemalloc-5.3.0.tar.bz2 -o jemalloc-5.3.0.tar.bz2
+
+    - name: "Unzip jemalloc"
+      if: steps.cache-jemalloc.outputs.cache-hit != 'true'
+      run: tar xvf jemalloc-5.3.0.tar.bz2
+
+    - name: "Configure jemalloc"
+      if: steps.cache-jemalloc.outputs.cache-hit != 'true'
+      run: |
+        cd jemalloc-5.3.0
+        ./configure
+        make
+        sudo make install
+
+    - name: "Preload jemalloc"
+      run: |
+        echo 'export DYLD_INSERT_LIBRARIES=/usr/local/lib/libjemalloc.2.dylib' >> $GITHUB_ENV
+        cp /usr/local/lib/libjemalloc.2.dylib /tmp/
+
+    - name: "Save jemalloc"
+      uses: actions/cache/save@v3
+      if: steps.cache-jemalloc.outputs.cache-hit != 'true'
+      with:
+        path: /tmp/libjemalloc.2.dylib
+        key: v2-${{ runner.os }}-jemalloc-5.3.0
+
     - name: "Print Java Flags & version"
       run: |
         java -XX:+UseParallelGC -XX:+UnlockExperimentalVMOptions -XX:+PrintFlagsFinal -version
